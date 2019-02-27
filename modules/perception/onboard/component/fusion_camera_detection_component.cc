@@ -208,17 +208,20 @@ bool FusionCameraDetectionComponent::Init() {
     // computed from camera height and pitch.
     // Apply online calibration to adjust pitch/height automatically
     // Temporary code is used here for test
-    double pitch_adj = -0.1;
+    double pitch_adj_degree = 0.0;  // yaw
+    double yaw_adj_degree = 0.0;     // roll
+    double roll_adj_degree = 0.0;    // pitch
     // load in lidar to imu extrinsic
     Eigen::Matrix4d ex_lidar2imu;
     LoadExtrinsics(FLAGS_obs_sensor_intrinsic_path + "/" +
                        "velodyne128_novatel_extrinsics.yaml",
                    &ex_lidar2imu);
-    ex_lidar2imu.block(0, 3, 3, 1) = -ex_lidar2imu.block(0, 3, 3, 1);
+//    ex_lidar2imu.block(0, 3, 3, 1) = -ex_lidar2imu.block(0, 3, 3, 1);
     AINFO << "velodyne128_novatel_extrinsics: " << ex_lidar2imu;
 
     CHECK(visualize_.Init_all_info_single_camera(
-        visual_camera_, intrinsic_map_, extrinsic_map_, ex_lidar2imu, pitch_adj,
+        visual_camera_, intrinsic_map_, extrinsic_map_, ex_lidar2imu,
+        pitch_adj_degree, yaw_adj_degree, roll_adj_degree,
         image_height_, image_width_));
     if (write_visual_img_) {
       visualize_.write_out_img_ = true;

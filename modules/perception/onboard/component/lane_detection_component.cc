@@ -217,6 +217,8 @@ bool LaneDetectionComponent::Init() {
     // Apply online calibration to adjust pitch/height automatically
     // Temporary code is used here for test
     double pitch_adj = -0.1;
+    double yaw_adj = 0.0;
+    double roll_adj = 0.0;
     // load in lidar to imu extrinsic
     Eigen::Matrix4d ex_lidar2imu;
     LoadExtrinsics(FLAGS_obs_sensor_intrinsic_path + "/" +
@@ -227,7 +229,7 @@ bool LaneDetectionComponent::Init() {
 
     CHECK(visualize_.Init_all_info_single_camera(
         visual_camera_, intrinsic_map_, extrinsic_map_, ex_lidar2imu, pitch_adj,
-        image_height_, image_width_));
+        yaw_adj, roll_adj, image_height_, image_width_));
     if (write_visual_img_) {
       visualize_.write_out_img_ = true;
       visualize_.SetDirectory(visual_debug_folder_);

@@ -15,6 +15,7 @@
  *****************************************************************************/
 #include "modules/perception/camera/tools/offline/visualizer.h"
 
+#include <limits>
 #include "cyber/common/log.h"
 
 namespace apollo {
@@ -49,14 +50,20 @@ bool Visualizer::Init(const std::vector<std::string> &camera_names,
 
 bool Visualizer::Init_all_info_single_camera(
     const std::string &camera_name,
-    std::map<std::string, Eigen::Matrix3f> intrinsic_map,
-    std::map<std::string, Eigen::Matrix4d> extrinsic_map,
-    Eigen::Matrix4d ex_lidar2imu, double pitch_adj, int image_height,
-    int image_width) {
+    const std::map<std::string, Eigen::Matrix3f> &intrinsic_map,
+    const std::map<std::string, Eigen::Matrix4d> &extrinsic_map,
+    const Eigen::Matrix4d &ex_lidar2imu,
+    const double &pitch_adj_degree,
+    const double &yaw_adj_degree,
+    const double &roll_adj_degree,
+    const int image_height,
+    const int image_width) {
   image_height_ = image_height;
   image_width_ = image_width;
   intrinsic_map_ = intrinsic_map;
   extrinsic_map_ = extrinsic_map;
+  ex_lidar2imu_ = ex_lidar2imu;
+
   last_timestamp_ = 0;
   small_h_ = static_cast<int>(image_height_ * scale_ratio_);
   small_w_ = static_cast<int>(image_width_ * scale_ratio_);
@@ -68,48 +75,129 @@ bool Visualizer::Init_all_info_single_camera(
       cv::Mat(small_h_, small_w_, CV_8UC3, cv::Scalar(0, 0, 0));
   world_image_ = cv::Mat(world_h_, wide_pixel_, CV_8UC3, cv::Scalar(0, 0, 0));
 
-  extrinsic_map_.at(camera_name).block(0, 3, 3, 1) =
-      -extrinsic_map_.at(camera_name).block(0, 3, 3, 1);
+  // 1. transform camera_>lidar
+  ex_camera2lidar_ = extrinsic_map_.at(camera_name);
+  AINFO << "ex_camera2lidar_ = ";
+  AINFO << extrinsic_map_.at(camera_name);
+
+  AINFO << "ex_lidar2imu_ =";
+  AINFO << ex_lidar2imu_;
+
+  // 2. transform camera->lidar->imu
+  ex_camera2imu_ = ex_lidar2imu_ * ex_camera2lidar_;
+  AINFO << "ex_camera2imu_ =";
+  AINFO << ex_camera2imu_;
+
+  // intrinsic camera parameter
+  K_ = intrinsic_map_.at(camera_name).cast<double>();
+
   // rotate 90 degree around z axis to make x point forward
-  Eigen::Matrix4d Rz;
-  Rz << 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1;
-  extrinsic_map_.at(camera_name) =
-      extrinsic_map_.at(camera_name) * ex_lidar2imu * Rz;
-  // adjust pitch in camera coords
-  Eigen::Matrix4d Rx;
-  Rx << 1, 0, 0, 0, 0, cos(pitch_adj), -sin(pitch_adj), 0, 0, sin(pitch_adj),
-      cos(pitch_adj), 0, 0, 0, 0, 1;
-  extrinsic_map_.at(camera_name) = extrinsic_map_.at(camera_name) * Rx;
-  AINFO << "extrinsic parameter from camera to car: "
-        << extrinsic_map_.at(camera_name);
+  // double imu_height = 0;  // imu height should be considred later
+  ex_imu2car_ << 0, 1, 0, 0,  // cos(90), sin(90), 0,
+                -1, 0, 0, 0,  // -sin(90),  cos(90), 0,
+                0, 0, 1, 0,  // 0,              0, 1
+                0, 0, 0, 1;
 
-  // compute the homography matrix, such that H [u, v, 1]' ~ [X_l, Y_l, 1]
-  Eigen::Matrix3d K = intrinsic_map_.at(camera_name).cast<double>();
-  Eigen::Matrix3d R = extrinsic_map_.at(camera_name).block(0, 0, 3, 3);
-  Eigen::Vector3d T = extrinsic_map_.at(camera_name).block(0, 3, 3, 1);
-  Eigen::Matrix3d H;
+  // 3. transform camera->lidar->imu->car
+  ex_camera2car_ = ex_imu2car_ * ex_camera2imu_;
 
-  H.block(0, 0, 3, 2) = (K * R.transpose()).block(0, 0, 3, 2);
-  H.block(0, 2, 3, 1) = -K * R.transpose() * T;
-  homography_im2ground_ = H.inverse();
+  AINFO << "ex_camera2car_ =";
+  AINFO << ex_camera2car_;
 
-  AINFO << "homography_im2ground_: " << homography_im2ground_;
-
+  // Adjust angle
+  adjust_angles(camera_name,
+    pitch_adj_degree, yaw_adj_degree, roll_adj_degree);
   // compute FOV points
   p_fov_1_.x = 0;
   p_fov_1_.y = static_cast<int>(image_height_ * fov_cut_ratio_);
 
-  p_fov_2_.x = 1920 - 1;
+  p_fov_2_.x = image_width_ - 1;
   p_fov_2_.y = static_cast<int>(image_height_ * fov_cut_ratio_);
 
   p_fov_3_.x = 0;
   p_fov_3_.y = image_height_ - 1;
 
-  p_fov_4_.x = 1920 - 1;
+  p_fov_4_.x = image_width_ - 1;
   p_fov_4_.y = image_height_ - 1;
+
+  vp1_[0] = 1024.0;
+  if (K_(0, 0) >= 1.0) {
+    vp1_[1] = (image_width_ >> 1) * vp1_[0] / K_(0, 0);
+  } else {
+    AWARN << "Focal length (" << K_(0, 0) <<
+    " in pixel) is incorrect. Please check camera intrinsic parameters.";
+    vp1_[1] = vp1_[0] * 0.25;
+  }
+
+  vp2_[0] = vp1_[0];
+  vp2_[1] = -vp1_[1];
+
+  pitch_adj_degree_ = pitch_adj_degree;
+  yaw_adj_degree_ = yaw_adj_degree;
+  roll_adj_degree_ = roll_adj_degree;
+
+  reset_key();
 
   return true;
 }
+
+bool Visualizer::adjust_angles(
+    const std::string &camera_name,
+    const double &pitch_adj_degree,
+    const double &yaw_adj_degree,
+    const double &roll_adj_degree) {
+
+  // Convert degree angles to radian angles
+  double pitch_adj_radian = pitch_adj_degree * degree_to_radian_factor;
+  double yaw_adj_radian = yaw_adj_degree * degree_to_radian_factor;
+  double roll_adj_radian = roll_adj_degree * degree_to_radian_factor;
+
+  // adjust pitch yaw roll in camera coords
+  // Remember that camera coordinate
+  // (Z)----> X
+  //  |
+  //  |
+  //  V
+  //  Y
+  Eigen::Matrix4d Rx;  // pitch
+  Rx << 1, 0, 0, 0,
+        0, cos(pitch_adj_radian), sin(pitch_adj_radian), 0,
+        0, -sin(pitch_adj_radian), cos(pitch_adj_radian), 0,
+        0, 0, 0, 1;
+  Eigen::Matrix4d Ry;  // yaw
+  Ry << cos(yaw_adj_radian), 0, -sin(yaw_adj_radian), 0,
+        0, 1, 0, 0,
+        sin(yaw_adj_radian), 0, cos(yaw_adj_radian), 0,
+        0, 0, 0, 1;
+  Eigen::Matrix4d Rz;  // roll
+  Rz << cos(roll_adj_radian), sin(roll_adj_radian), 0, 0,
+        -sin(roll_adj_radian), cos(roll_adj_radian), 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1;
+
+  adjusted_camera2car_ = ex_camera2car_ * Rz * Ry * Rx;
+  AINFO << "adjusted_camera2car_: "
+        << adjusted_camera2car_;
+  ex_car2camera_ = adjusted_camera2car_.inverse();
+
+  // compute the homography matrix, such that H [u, v, 1]' ~ [X_l, Y_l, 1]
+  Eigen::Matrix3d R = ex_car2camera_.block(0, 0, 3, 3);
+  Eigen::Vector3d T = ex_car2camera_.block(0, 3, 3, 1);
+
+  projection_matrix_.setIdentity();
+  projection_matrix_.block(0, 0, 3, 3) = K_ * R;
+  projection_matrix_.block(0, 3, 3, 1) = K_ * T;
+
+  homography_ground2image_.block(0, 0, 3, 2)
+    = projection_matrix_.block(0, 0, 3, 2);
+  homography_ground2image_.block(0, 2, 3, 1)
+    = projection_matrix_.block(0, 3, 3, 1);
+
+  homography_image2ground_ = homography_ground2image_.inverse();
+
+  return true;
+}
+
 
 void Visualizer::SetDirectory(const std::string &path) {
   std::string command;
@@ -172,6 +260,186 @@ std::string Visualizer::sub_type_to_string(
       return "WRNG";
   }
   return "WRNG";
+}
+bool Visualizer::reset_key() {
+  use_class_color_ = true;
+  capture_screen_ = false;
+  capture_video_ = false;
+  show_camera_box2d_ = true;
+  show_camera_box3d_ = true;
+  show_camera_bdv_ = true;
+  show_radar_pc_ = true;
+  show_fusion_ = false;
+  show_associate_color_ = false;
+  show_type_id_label_ = true;
+  show_verbose_ = false;
+  show_lane_ = true;
+  show_trajectory_ = true;
+  show_vp_grid_ = true;  // show vanishing point and ground plane grid
+  draw_lane_objects_ = true;
+  show_box_ = true;
+  show_velocity_ = false;
+  show_polygon_ = true;
+  show_text_ = false;
+  show_help_text_ = false;
+  return true;
+}
+
+bool Visualizer::key_handler(const std::string &camera_name, const int key) {
+  AINFO << "Pressed Key: " << key;
+  if (key <= 0) {
+    return false;
+  }
+  switch (key) {
+    case 48:  // 0
+      show_associate_color_ = !show_associate_color_;
+      break;
+    case 50:  // 2
+      show_camera_box2d_ = !show_camera_box2d_;
+      break;
+    case 51:  // 3
+      show_camera_box3d_ = !show_camera_box3d_;
+      break;
+    case 65: case 97:  // 'A' 'a'
+      capture_video_ = !capture_video_;
+      break;
+    case 66: case 98:  // 'B' 'b'
+      show_box_ = (show_box_ + 1) % 2;
+      break;
+    case 67: case 99:  // 'C' 'd'
+      use_class_color_ = !use_class_color_;
+      break;
+    case 68: case 100:  // 'D' 'd'
+      show_radar_pc_ = !show_radar_pc_;
+      break;
+    case 69: case 101:  // 'E' 'e'
+      draw_lane_objects_ = !draw_lane_objects_;
+      break;
+    case 70: case 102:  // 'F' 'f'
+      show_fusion_ = !show_fusion_;
+      break;
+    case 71: case 103:  // 'G' 'g'
+      show_vp_grid_ = !show_vp_grid_;
+      break;
+    case 72: case 104:  // 'H' 'h'
+      show_help_text_ = !show_help_text_;
+      break;
+    case 73: case 105:  // 'I' 'i'
+      show_type_id_label_ = !show_type_id_label_;
+      break;
+    case 76: case 108:  // 'L' 'l'
+      show_verbose_ = !show_verbose_;
+      break;
+    case 79: case 111:  // 'O' 'o'
+      show_camera_bdv_ = !show_camera_bdv_;
+      break;
+    case 81: case 113:  // 'Q' 'q'
+      show_lane_ = !show_lane_;
+      break;
+    case 82: case 114:  // 'R' 'r'
+      reset_key();
+      break;
+    case 83: case 115:  // 'S' 's'
+      capture_screen_ = true;
+      break;
+    case 84: case 116:  // 'T' 't'
+      show_trajectory_ = !show_trajectory_;
+      break;
+    case 86: case 118:  // 'V' 'v'
+      show_velocity_ = (show_velocity_ + 1) % 2;
+      break;
+    case 65362:  // Up Arrow
+      if (pitch_adj_degree_ - 0.05 <= max_pitch_degree_) {
+        pitch_adj_degree_ += 0.05;
+      }
+      AINFO << "Current pitch: " << pitch_adj_degree_;
+      break;
+    case 65364:  // Down Arrow
+      if (pitch_adj_degree_ + 0.05 >= min_pitch_degree_) {
+        pitch_adj_degree_ -= 0.05;
+      }
+      AINFO << "Current pitch: " << pitch_adj_degree_;
+      break;
+    case 65363:  // Right Arrow
+      if (yaw_adj_degree_ - 0.05 <= max_yaw_degree_) {
+        yaw_adj_degree_ += 0.05;
+      }
+      AINFO << "Current yaw: " << yaw_adj_degree_;
+      break;
+    case 65361:  // Left Arrow
+      if (yaw_adj_degree_ + 0.05 >= min_yaw_degree_) {
+        yaw_adj_degree_ -= 0.05;
+      }
+      AINFO << "Current yaw: " << yaw_adj_degree_;
+      break;
+    case 130899:  // Right Arrow
+      if (roll_adj_degree_ - 0.05 <= max_roll_degree_) {
+        roll_adj_degree_ += 0.05;
+      }
+      AINFO << "Current roll: " << roll_adj_degree_;
+      break;
+    case 130897:  // ALT + LEFT-Arrow
+      if (roll_adj_degree_ + 0.05 >= min_roll_degree_) {
+        roll_adj_degree_ -= 0.05;
+      }
+      AINFO << "Current roll: " << roll_adj_degree_;
+      break;
+    default:
+      break;
+  }
+
+  help_str_ = "H: show help";
+  if (show_help_text_) {
+    help_str_ += " (ON)";
+    help_str_ += "\nR: reset matrxi\nB: show box";
+    if (show_box_) help_str_ += "(ON)";
+    help_str_ += "\nV: show velocity";
+    if (show_velocity_) help_str_ += " (ON)";
+    help_str_ += "\nC: use class color";
+    if (use_class_color_) help_str_ += " (ON)";
+    help_str_ += "\nS: capture screen";
+    help_str_ += "\nA: capture video";
+    help_str_ += "\nI: show type id label";
+    if (show_type_id_label_) help_str_ += " (ON)";
+    help_str_ += "\nQ: show lane";
+    if (show_lane_) help_str_ += " (ON)";
+    help_str_ += "\nE: draw lane objects";
+    if (draw_lane_objects_) help_str_ += " (ON)";
+    help_str_ += "\nF: show fusion";
+    if (show_fusion_) help_str_ += " (ON)";
+    help_str_ += "\nD: show radar pc";
+    if (show_radar_pc_) help_str_ += " (ON)";
+    help_str_ += "\nT: show trajectory";
+    if (show_trajectory_) help_str_ += " (ON)";
+    help_str_ += "\nO: show camera bdv";
+    if (show_camera_bdv_) help_str_ += " (ON)";
+    help_str_ += "\n2: show camera box2d";
+    if (show_camera_box2d_) help_str_ += " (ON)";
+    help_str_ += "\n3: show camera box3d";
+    if (show_camera_box3d_) help_str_ += " (ON)";
+    help_str_ += "\n0: show associate color";
+    if (show_associate_color_) help_str_ += " (ON)";
+    help_str_ += "\nG: show vanishing point and ground plane grid";
+    if (show_vp_grid_) help_str_ += " (ON)";
+    help_str_ += "\nT: show verbose";
+    if (show_verbose_) help_str_ += " (ON)";
+  }
+  switch (key) {
+    case 65362:  // Up_Arrow
+    case 65361:  // Left_Arrow
+    case 65363:  // Right_Arrow
+    case 65364:  // Down_Arrow
+    case 130897:  // ALT + Left_Arrow
+    case 130899:  // ALT + Right_Arrow
+    adjust_angles(camera_name,
+      pitch_adj_degree_, yaw_adj_degree_, roll_adj_degree_);
+    if (show_help_text_) {
+      help_str_ += "\nAdjusted Pitch: " + std::to_string(pitch_adj_degree_);
+      help_str_ += "\nAdjusted Yaw: " + std::to_string(yaw_adj_degree_);
+      help_str_ += "\nAdjusted Roll: " + std::to_string(roll_adj_degree_);
+    }
+  }
+  return true;
 }
 
 void Visualizer::Draw2Dand3D(const cv::Mat &img, const CameraFrame &frame) {
@@ -260,7 +528,8 @@ void Visualizer::ShowResult(const cv::Mat &img, const CameraFrame &frame) {
     }
 
     cv::imshow("", bigimg);
-    cvWaitKey(30);
+    int key = cvWaitKey(30);
+    key_handler(camera_name, key);
     world_image_ = cv::Mat(world_h_, wide_pixel_, CV_8UC3, cv::Scalar(0, 0, 0));
     draw_range_circle();
   }
@@ -282,23 +551,36 @@ void Visualizer::Draw2Dand3D_all_info_single_camera(const cv::Mat &img,
                                                     Eigen::Matrix4d extrinsic) {
   cv::Mat img2 = img;
   // plot FOV
-  cv::line(img2, p_fov_1_, p_fov_2_, cv::Scalar(255, 255, 255), 2);
-  cv::line(img2, p_fov_1_, p_fov_3_, cv::Scalar(255, 255, 255), 2);
-  cv::line(img2, p_fov_2_, p_fov_4_, cv::Scalar(255, 255, 255), 2);
-  cv::line(world_image_, world_point_to_bigimg(image2ground(p_fov_1_)),
-           world_point_to_bigimg(image2ground(p_fov_2_)),
-           cv::Scalar(255, 255, 255), 2);
-  cv::line(world_image_, world_point_to_bigimg(image2ground(p_fov_1_)),
-           world_point_to_bigimg(image2ground(p_fov_3_)),
-           cv::Scalar(255, 255, 255), 2);
-  cv::line(world_image_, world_point_to_bigimg(image2ground(p_fov_2_)),
-           world_point_to_bigimg(image2ground(p_fov_4_)),
-           cv::Scalar(255, 255, 255), 2);
+  // cv::line(img2, p_fov_1_, p_fov_2_, cv::Scalar(255, 255, 255), 2);
+  // cv::line(img2, p_fov_1_, p_fov_3_, cv::Scalar(255, 255, 255), 2);
+  // cv::line(img2, p_fov_2_, p_fov_4_, cv::Scalar(255, 255, 255), 2);
+  // cv::line(world_image_, world_point_to_bigimg(image2ground(p_fov_1_)),
+  //          world_point_to_bigimg(image2ground(p_fov_2_)),
+  //          cv::Scalar(255, 255, 255), 2);
+  // cv::line(world_image_, world_point_to_bigimg(image2ground(p_fov_1_)),
+  //          world_point_to_bigimg(image2ground(p_fov_3_)),
+  //          cv::Scalar(255, 255, 255), 2);
+  // cv::line(world_image_, world_point_to_bigimg(image2ground(p_fov_2_)),
+  //          world_point_to_bigimg(image2ground(p_fov_4_)),
+  //          cv::Scalar(255, 255, 255), 2);
 
-  AINFO << "FOV point 1: " << image2ground(p_fov_1_);
-  AINFO << "FOV point 2: " << image2ground(p_fov_2_);
-  AINFO << "FOV point 3: " << image2ground(p_fov_3_);
-  AINFO << "FOV point 4: " << image2ground(p_fov_4_);
+  // cv::line(img2, p_fov_2_, p_fov_4_, cv::Scalar(255, 255, 255), 2);
+  // cv::line(world_image_, world_point_to_bigimg(image2ground(p_fov_1_)),
+  //          world_point_to_bigimg(image2ground(p_fov_2_)),
+  //          cv::Scalar(255, 255, 255), 2);
+  // cv::line(world_image_, world_point_to_bigimg(image2ground(p_fov_1_)),
+
+  if (show_vp_grid_) {
+    cv::line(img2, ground2image(vp1_), ground2image(vp2_),
+             cv::Scalar(255, 255, 255), 2);
+  }
+  // AINFO << "vp1_: " << vp1_ << ", vp1_image: " << ground2image(vp1_);
+  // AINFO << "vp2_: " << vp2_ << ", vp2_image: " << ground2image(vp2_);
+
+  // AINFO << "FOV point 1: " << image2ground(p_fov_1_);
+  // AINFO << "FOV point 2: " << image2ground(p_fov_2_);
+  // AINFO << "FOV point 3: " << image2ground(p_fov_3_);
+  // AINFO << "FOV point 4: " << image2ground(p_fov_4_);
 
   // plot laneline on image and ground plane
   for (const auto &object : frame.lane_objects) {
@@ -526,7 +808,8 @@ void Visualizer::ShowResult_all_info_single_camera(const cv::Mat &img,
       cv::imwrite(path, bigimg);
     }
     cv::imshow("", bigimg);
-    cvWaitKey(30);
+    int key = cvWaitKey(30);
+    key_handler(camera_name, key);
     world_image_ = cv::Mat(world_h_, wide_pixel_, CV_8UC3, cv::Scalar(0, 0, 0));
     draw_range_circle();
   }
@@ -573,13 +856,29 @@ cv::Point Visualizer::world_point_to_bigimg(const Eigen::Vector2d &p) {
 
 Eigen::Vector2d Visualizer::image2ground(cv::Point p_img) {
   Eigen::Vector3d p_homo;
+
   p_homo << p_img.x, p_img.y, 1;
   Eigen::Vector3d p_ground;
-  p_ground = homography_im2ground_ * p_homo;
-  p_ground[0] = p_ground[0] / p_ground[2];
-  p_ground[1] = p_ground[1] / p_ground[2];
+  p_ground = homography_image2ground_ * p_homo;
+  if (fabs(p_ground[2]) > std::numeric_limits<double>::min()) {
+    p_ground[0] = p_ground[0] / p_ground[2];
+    p_ground[1] = p_ground[1] / p_ground[2];
+  }
   return p_ground.block(0, 0, 2, 1);
 }
+cv::Point Visualizer::ground2image(Eigen::Vector2d p_ground) {
+  Eigen::Vector3d p_homo;
+
+  p_homo << p_ground[0], p_ground[1], 1;
+  Eigen::Vector3d p_img;
+  p_img = homography_ground2image_ * p_homo;
+  if (fabs(p_img[2]) > std::numeric_limits<double>::min()) {
+    p_img[0] = p_img[0] / p_img[2];
+    p_img[1] = p_img[1] / p_img[2];
+  }
+  return cv::Point(static_cast<int>(p_img[0]), static_cast<int>(p_img[1]));
+}
+
 }  // namespace camera
 }  // namespace perception
 }  // namespace apollo
