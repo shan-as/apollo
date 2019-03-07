@@ -17,7 +17,7 @@ perception = CAMERA
 
 
 [LocalizationConf]
-utm_zone = 16
+utm_zone = 10
 
 
 [PlanningConf]

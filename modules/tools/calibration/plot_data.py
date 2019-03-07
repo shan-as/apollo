@@ -38,6 +38,7 @@ class Plotter(object):
         """
         init the speed info
         """
+
         np.set_printoptions(precision=3)
         self.file = open('temp_result.csv', 'a')
 
@@ -45,6 +46,7 @@ class Plotter(object):
         """
         load the file and preprocess th data
         """
+
         self.data = preprocess(filename)
 
         self.tablecmd, self.tablespeed, self.tableacc, self.speedsection, self.accsection, self.timesection = process(
@@ -139,4 +141,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

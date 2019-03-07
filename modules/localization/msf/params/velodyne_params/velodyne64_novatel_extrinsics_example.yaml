@@ -1,9 +1,9 @@
 child_frame_id: velodyne64
 transform:
   translation:
-    x: -0.01
-    y: 0.42
-    z: 1.87
+    x: -0.0581372003122598
+    y: 1.459274166013735
+    z: 1.24965
   rotation:
     x: 0.02748694630673456
     y: -0.03223034579615043

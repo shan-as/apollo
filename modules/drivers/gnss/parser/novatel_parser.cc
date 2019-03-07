@@ -169,7 +169,7 @@ class NovatelParser : public Parser {
 
   size_t total_length_ = 0;
 
-  config::ImuType imu_type_ = config::ImuType::KVH1750;
+  config::ImuType imu_type_ = config::ImuType::ADIS16488;
 
   // -1 is an unused value.
   novatel::SolutionStatus solution_status_ =

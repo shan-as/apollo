@@ -62,8 +62,7 @@ class LaneRecord(object):
 
         self.localization = localization_pb2.LocalizationEstimate()
         self.mobileye = mobileye_pb2.Mobileye()
-        #self.mobileye_received = False
-        self.mobileye_received = True
+        self.mobileye_received = False
         self.terminating = False
 
     def mobileye_callback(self, data):
@@ -95,15 +94,10 @@ class LaneRecord(object):
         cary = self.localization.pose.position.y
         carz = self.localization.pose.position.z
         cartheta = self.localization.pose.heading
-        dist_l = 2.5
-        conf_l = -1
-        dist_r = 2.5
-        conf_r = -1
-
-#        dist_l = self.mobileye.aftermarket_669.distance_to_lane_l
-#        conf_l = self.mobileye.aftermarket_669.lane_conf_left
-#        dist_r = self.mobileye.aftermarket_669.distance_to_lane_r
-#        conf_r = self.mobileye.aftermarket_669.lane_conf_right
+        dist_l = self.mobileye.aftermarket_669.distance_to_lane_l
+        conf_l = self.mobileye.aftermarket_669.lane_conf_left
+        dist_r = self.mobileye.aftermarket_669.distance_to_lane_r
+        conf_r = self.mobileye.aftermarket_669.lane_conf_right
 
         self.write(
             "%s, %s, %s, %s, %s, %s, %s, %s\n" %

@@ -37,7 +37,6 @@ cmd_table = {}
 
 for line in f:
     items = line.split(',')
-    python(items[0])
     cmd = round(float(items[0]))
     speed = float(items[1])
     acc = float(items[2])

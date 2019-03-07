@@ -452,7 +452,6 @@ static_assert(sizeof(InsPvaX) == 126, "Incorrect size of InsPvaX");
 //   ISA100C = 26,        // Northrop Grumman Litef ISA-100C
 //   ADIS16488 = 31,      // Analog Devices ADIS16488
 //   STIM300 = 32,        // Sensonor STIM300
-//   KVH1750 = 33,        // KVH Industries KVH1750
 //   ISA100 = 34,         // Northrop Grumman Litef ISA-100
 //   ISA100_400HZ = 38,   // Northrop Grumman Litef ISA-100
 //   ISA100C_400HZ = 39,  // Northrop Grumman Litef ISA-100
@@ -534,10 +533,6 @@ inline ImuParameter GetImuParameter(ImuType type) {
     case ImuType::STIM300:
       // 2**-21 deg/LSB, 2**-22 m/s/LSB
       return {8.32237840649762e-09, 2.384185791015625e-07, 125.0};
-
-    case ImuType::KVH1750:
-      // 0.1/(3600.0x256.0) rad/LSB, 0.05/2^15 m/s/LSB, 200 Hz
-      return {1.08506944e-7, 1.52587e-6, 200.0};
 
     case ImuType::ISA100:
     case ImuType::ISA100C:

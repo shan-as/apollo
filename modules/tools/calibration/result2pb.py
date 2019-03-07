@@ -60,6 +60,7 @@ def load_calibration_raw_data(fn):
             else:
                 acc_table[acc] = [cmd]
         speed_table2[speed] = acc_table
+
     return speed_table2
 
 def load_calibration_raw_data_old(fn):
@@ -112,5 +113,3 @@ if __name__ == "__main__":
 
     with open('control_conf.pb.txt', 'w') as f:
         f.write(str(ctl_conf_pb))
-    print("Output file: control_conf.pb.txt")
-

@@ -5,9 +5,9 @@ vehicle_parameter {
 }
 
 can_card_parameter {
-  brand: ESD_CAN
+  brand: SOCKET_CAN_RAW
   type: PCI_CARD
-  channel_id: CHANNEL_ID_ONE
+  channel_id: CHANNEL_ID_ZERO
 }
 
 enable_debug_mode: false
