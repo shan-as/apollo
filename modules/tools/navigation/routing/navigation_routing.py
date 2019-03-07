@@ -51,7 +51,7 @@ line_ew = None
 line_we = None
 line_revloop = None
 
-projector = pyproj.Proj(proj='utm', zone=10, ellps='WGS84')
+projector = pyproj.Proj(proj='utm', zone=16, ellps='WGS84')
 
 
 def add_listener():

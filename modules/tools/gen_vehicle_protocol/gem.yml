@@ -1,0 +1,642 @@
+car_type: gem
+protocols:
+  '63':
+    id: '63'
+    name: turn_cmd_63
+    protocol_type: report
+    sender: CUSTOMER_ECU
+    vars:
+    - bit: 7
+      enum: {0: TURN_SIGNAL_CMD_RIGHT, 1: TURN_SIGNAL_CMD_NONE, 2: TURN_SIGNAL_CMD_LEFT,
+        3: TURN_SIGNAL_CMD_HAZARD}
+      is_signed_var: false
+      len: 8
+      name: TURN_SIGNAL_CMD
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|3]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  '64':
+    id: '64'
+    name: turn_rpt_64
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - bit: 7
+      enum: {0: MANUAL_INPUT_RIGHT, 1: MANUAL_INPUT_NONE, 2: MANUAL_INPUT_LEFT, 3: MANUAL_INPUT_HAZARD}
+      is_signed_var: false
+      len: 8
+      name: MANUAL_INPUT
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|3]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 15
+      enum: {0: COMMANDED_VALUE_RIGHT, 1: COMMANDED_VALUE_NONE, 2: COMMANDED_VALUE_LEFT,
+        3: COMMANDED_VALUE_HAZARD}
+      is_signed_var: false
+      len: 8
+      name: COMMANDED_VALUE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|3]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 23
+      enum: {0: OUTPUT_VALUE_RIGHT, 1: OUTPUT_VALUE_NONE, 2: OUTPUT_VALUE_LEFT, 3: OUTPUT_VALUE_HAZARD}
+      is_signed_var: false
+      len: 8
+      name: OUTPUT_VALUE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|3]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  '65':
+    id: '65'
+    name: shift_cmd_65
+    protocol_type: report
+    sender: CUSTOMER_ECU
+    vars:
+    - bit: 7
+      description: FORWARD_is_also_LOW_on_vehicles_with_LOW/HIGH,_PARK_and_HIGH_only_available_on_certain_Vehicles
+      enum: {0: SHIFT_CMD_PARK, 1: SHIFT_CMD_REVERSE, 2: SHIFT_CMD_NEUTRAL, 3: SHIFT_CMD_FORWARD,
+        4: SHIFT_CMD_LOW}
+      is_signed_var: false
+      len: 8
+      name: SHIFT_CMD
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|4]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  '66':
+    id: '66'
+    name: shift_rpt_66
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - bit: 7
+      enum: {0: MANUAL_INPUT_PARK, 1: MANUAL_INPUT_REVERSE, 2: MANUAL_INPUT_NEUTRAL,
+        3: MANUAL_INPUT_FORWARD, 4: MANUAL_INPUT_HIGH}
+      is_signed_var: false
+      len: 8
+      name: MANUAL_INPUT
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|4]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 15
+      enum: {0: COMMANDED_VALUE_PARK, 1: COMMANDED_VALUE_REVERSE, 2: COMMANDED_VALUE_NEUTRAL,
+        3: COMMANDED_VALUE_FORWARD, 4: COMMANDED_VALUE_HIGH}
+      is_signed_var: false
+      len: 8
+      name: COMMANDED_VALUE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|4]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 23
+      enum: {0: OUTPUT_VALUE_PARK, 1: OUTPUT_VALUE_REVERSE, 2: OUTPUT_VALUE_NEUTRAL,
+        3: OUTPUT_VALUE_FORWARD, 4: OUTPUT_VALUE_HIGH}
+      is_signed_var: false
+      len: 8
+      name: OUTPUT_VALUE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|4]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  '67':
+    id: '67'
+    name: accel_cmd_67
+    protocol_type: report
+    sender: CUSTOMER_ECU
+    vars:
+    - {bit: 7, is_signed_var: false, len: 16, name: ACCEL_CMD, offset: 0.0, order: motorola,
+      physical_range: '[0|1]', physical_unit: '%', precision: 0.001, type: double}
+  '68':
+    id: '68'
+    name: accel_rpt_68
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 7, is_signed_var: false, len: 16, name: MANUAL_INPUT, offset: 0.0, order: motorola,
+      physical_range: '[0|1]', physical_unit: '%', precision: 0.001, type: double}
+    - {bit: 23, is_signed_var: false, len: 16, name: COMMANDED_VALUE, offset: 0.0,
+      order: motorola, physical_range: '[0|1]', physical_unit: '%', precision: 0.001,
+      type: double}
+    - {bit: 39, is_signed_var: false, len: 16, name: OUTPUT_VALUE, offset: 0.0, order: motorola,
+      physical_range: '[0|1]', physical_unit: '%', precision: 0.001, type: double}
+  '69':
+    id: '69'
+    name: global_cmd_69
+    protocol_type: report
+    sender: CUSTOMER_ECU
+    vars:
+    - bit: 0
+      enum: {0: PACMOD_ENABLE_CONTROL_DISABLED, 1: PACMOD_ENABLE_CONTROL_ENABLED}
+      is_signed_var: false
+      len: 1
+      name: PACMOD_ENABLE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 1
+      enum: {0: CLEAR_OVERRIDE_DON_T_CLEAR_ACTIVE_OVERRIDES, 1: CLEAR_OVERRIDE_CLEAR_ACTIVE_OVERRIDES}
+      is_signed_var: false
+      len: 1
+      name: CLEAR_OVERRIDE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 2
+      enum: {0: IGNORE_OVERRIDE_DON_T_IGNORE_USER_OVERRIDES, 1: IGNORE_OVERRIDE_IGNORE_USER_OVERRIDES}
+      is_signed_var: false
+      len: 1
+      name: IGNORE_OVERRIDE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  6a:
+    id: 6a
+    name: global_rpt_6a
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - bit: 0
+      enum: {0: PACMOD_STATUS_CONTROL_DISABLED, 1: PACMOD_STATUS_CONTROL_ENABLED}
+      is_signed_var: false
+      len: 1
+      name: PACMOD_STATUS
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 1
+      enum: {0: OVERRIDE_STATUS_NOT_OVERRIDDEN, 1: OVERRIDE_STATUS_OVERRIDDEN}
+      is_signed_var: false
+      len: 1
+      name: OVERRIDE_STATUS
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - {bit: 2, is_signed_var: false, len: 1, name: VEH_CAN_TIMEOUT, offset: 0.0, order: motorola,
+      physical_range: '[0|1]', physical_unit: '', precision: 1.0, type: bool}
+    - {bit: 3, is_signed_var: false, len: 1, name: STR_CAN_TIMEOUT, offset: 0.0, order: motorola,
+      physical_range: '[0|1]', physical_unit: '', precision: 1.0, type: bool}
+    - bit: 4
+      enum: {0: BRK_CAN_TIMEOUT_NO_ACTIVE_CAN_TIMEOUT, 1: BRK_CAN_TIMEOUT_ACTIVE_CAN_TIMEOUT}
+      is_signed_var: false
+      len: 1
+      name: BRK_CAN_TIMEOUT
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - {bit: 5, is_signed_var: false, len: 1, name: USR_CAN_TIMEOUT, offset: 0.0, order: motorola,
+      physical_range: '[0|1]', physical_unit: '', precision: 1.0, type: bool}
+    - {bit: 55, is_signed_var: false, len: 16, name: USR_CAN_READ_ERRORS, offset: 0.0,
+      order: motorola, physical_range: '[0|65535]', physical_unit: '', precision: 1.0,
+      type: int}
+  6b:
+    id: 6b
+    name: brake_cmd_6b
+    protocol_type: report
+    sender: CUSTOMER_ECU
+    vars:
+    - {bit: 7, is_signed_var: false, len: 16, name: BRAKE_CMD, offset: 0.0, order: motorola,
+      physical_range: '[0|1]', physical_unit: '%', precision: 0.001, type: double}
+  6c:
+    id: 6c
+    name: brake_rpt_6c
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 7, is_signed_var: false, len: 16, name: MANUAL_INPUT, offset: 0.0, order: motorola,
+      physical_range: '[0|1]', physical_unit: '%', precision: 0.001, type: double}
+    - {bit: 23, is_signed_var: false, len: 16, name: COMMANDED_VALUE, offset: 0.0,
+      order: motorola, physical_range: '[0|1]', physical_unit: '%', precision: 0.001,
+      type: double}
+    - {bit: 39, is_signed_var: false, len: 16, name: OUTPUT_VALUE, offset: 0.0, order: motorola,
+      physical_range: '[0|1]', physical_unit: '%', precision: 0.001, type: double}
+    - bit: 48
+      enum: {0: BRAKE_ON_OFF_OFF, 1: BRAKE_ON_OFF_ON}
+      is_signed_var: false
+      len: 1
+      name: BRAKE_ON_OFF
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  6d:
+    id: 6d
+    name: steering_cmd_6d
+    protocol_type: report
+    sender: CUSTOMER_ECU
+    vars:
+    - {bit: 7, is_signed_var: true, len: 32, name: POSITION_VALUE, offset: 0.0, order: motorola,
+      physical_range: '[-12|12]', physical_unit: radians, precision: 0.001, type: double}
+    - {bit: 39, is_signed_var: false, len: 32, name: SPEED_LIMIT, offset: 0.0, order: motorola,
+      physical_range: '[0|4294967.295]', physical_unit: rad/s, precision: 0.001, type: double}
+  6e:
+    id: 6e
+    name: steering_rpt_1_6e
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 7, is_signed_var: true, len: 16, name: MANUAL_INPUT, offset: 0.0, order: motorola,
+      physical_range: '[-32.768|32.767]', physical_unit: rad/s, precision: 0.001,
+      type: double}
+    - {bit: 23, is_signed_var: true, len: 16, name: COMMANDED_VALUE, offset: 0.0,
+      order: motorola, physical_range: '[-32.768|32.767]', physical_unit: rad/s, precision: 0.001,
+      type: double}
+    - {bit: 39, is_signed_var: true, len: 16, name: OUTPUT_VALUE, offset: 0.0, order: motorola,
+      physical_range: '[-32.768|32.767]', physical_unit: rad/s, precision: 0.001,
+      type: double}
+  6f:
+    id: 6f
+    name: vehicle_speed_rpt_6f
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 7, is_signed_var: true, len: 16, name: VEHICLE_SPEED, offset: 0.0, order: motorola,
+      physical_range: '[-327.68|327.67]', physical_unit: m/s, precision: 0.01, type: double}
+    - bit: 16
+      enum: {0: VEHICLE_SPEED_VALID_INVALID, 1: VEHICLE_SPEED_VALID_VALID}
+      is_signed_var: false
+      len: 1
+      name: VEHICLE_SPEED_VALID
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  '70':
+    id: '70'
+    name: brake_motor_rpt_1_70
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 7, is_signed_var: false, len: 32, name: MOTOR_CURRENT, offset: 0.0, order: motorola,
+      physical_range: '[0|4294967.295]', physical_unit: amps, precision: 0.001, type: double}
+    - {bit: 39, is_signed_var: true, len: 32, name: SHAFT_POSITION, offset: 0.0, order: motorola,
+      physical_range: '[-2147483.648|2147483.647]', physical_unit: radians, precision: 0.001,
+      type: double}
+  '71':
+    id: '71'
+    name: brake_motor_rpt_2_71
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 7, is_signed_var: true, len: 16, name: ENCODER_TEMPERATURE, offset: -40.0,
+      order: motorola, physical_range: '[-32808|32727]', physical_unit: deg C, precision: 1.0,
+      type: int}
+    - {bit: 23, is_signed_var: true, len: 16, name: MOTOR_TEMPERATURE, offset: -40.0,
+      order: motorola, physical_range: '[-32808|32727]', physical_unit: deg C, precision: 1.0,
+      type: int}
+    - {bit: 39, is_signed_var: false, len: 32, name: ANGULAR_SPEED, offset: 0.0, order: motorola,
+      physical_range: '[0|4294967.295]', physical_unit: rev/s, precision: 0.001, type: double}
+  '72':
+    id: '72'
+    name: brake_motor_rpt_3_72
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 7, is_signed_var: true, len: 32, name: TORQUE_OUTPUT, offset: 0.0, order: motorola,
+      physical_range: '[-2147483.648|2147483.647]', physical_unit: N-m, precision: 0.001,
+      type: double}
+    - {bit: 39, is_signed_var: true, len: 32, name: TORQUE_INPUT, offset: 0.0, order: motorola,
+      physical_range: '[-2147483.648|2147483.647]', physical_unit: N-m, precision: 0.001,
+      type: double}
+  '73':
+    id: '73'
+    name: steering_motor_rpt_1_73
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 7, is_signed_var: false, len: 32, name: MOTOR_CURRENT, offset: 0.0, order: motorola,
+      physical_range: '[0|4294967.295]', physical_unit: amps, precision: 0.001, type: double}
+    - {bit: 39, is_signed_var: true, len: 32, name: SHAFT_POSITION, offset: 0.0, order: motorola,
+      physical_range: '[-2147483.648|2147483.647]', physical_unit: amps, precision: 0.001,
+      type: double}
+  '74':
+    id: '74'
+    name: steering_motor_rpt_2_74
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 7, is_signed_var: true, len: 16, name: ENCODER_TEMPERATURE, offset: -40.0,
+      order: motorola, physical_range: '[-32808|32727]', physical_unit: deg C, precision: 1.0,
+      type: int}
+    - {bit: 23, is_signed_var: true, len: 16, name: MOTOR_TEMPERATURE, offset: -40.0,
+      order: motorola, physical_range: '[-32808|32727]', physical_unit: deg C, precision: 1.0,
+      type: int}
+    - {bit: 39, is_signed_var: true, len: 32, name: ANGULAR_SPEED, offset: 0.0, order: motorola,
+      physical_range: '[-2147483.648|2147483.647]', physical_unit: rev/s, precision: 0.001,
+      type: double}
+  '75':
+    id: '75'
+    name: steering_motor_rpt_3_75
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 7, is_signed_var: true, len: 32, name: TORQUE_OUTPUT, offset: 0.0, order: motorola,
+      physical_range: '[-2147483.648|2147483.647]', physical_unit: N-m, precision: 0.001,
+      type: double}
+    - {bit: 39, is_signed_var: true, len: 32, name: TORQUE_INPUT, offset: 0.0, order: motorola,
+      physical_range: '[-2147483.648|2147483.647]', physical_unit: N-m, precision: 0.001,
+      type: double}
+  '76':
+    id: '76'
+    name: headlight_cmd_76
+    protocol_type: report
+    sender: CUSTOMER_ECU
+    vars:
+    - bit: 7
+      enum: {0: HEADLIGHT_CMD_HEADLIGHTS_OFF, 1: HEADLIGHT_CMD_LOW_BEAMS, 2: HEADLIGHT_CMD_HIGH_BEAMS}
+      is_signed_var: false
+      len: 8
+      name: HEADLIGHT_CMD
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|2]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  '77':
+    id: '77'
+    name: headlight_rpt_77
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - bit: 23
+      enum: {0: OUTPUT_VALUE_HEADLIGHTS_OFF, 1: OUTPUT_VALUE_LOW_BEAMS, 2: OUTPUT_VALUE_HIGH_BEAMS}
+      is_signed_var: false
+      len: 8
+      name: OUTPUT_VALUE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|2]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 7
+      enum: {0: MANUAL_INPUT_HEADLIGHTS_OFF, 1: MANUAL_INPUT_LOW_BEAMS, 2: MANUAL_INPUT_HIGH_BEAMS}
+      is_signed_var: false
+      len: 8
+      name: MANUAL_INPUT
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|2]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 15
+      enum: {0: COMMANDED_VALUE_HEADLIGHTS_OFF, 1: COMMANDED_VALUE_LOW_BEAMS, 2: COMMANDED_VALUE_HIGH_BEAMS}
+      is_signed_var: false
+      len: 8
+      name: COMMANDED_VALUE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|2]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  '78':
+    id: '78'
+    name: horn_cmd_78
+    protocol_type: report
+    sender: CUSTOMER_ECU
+    vars:
+    - bit: 7
+      enum: {0: HORN_CMD_OFF, 1: HORN_CMD_ON}
+      is_signed_var: false
+      len: 8
+      name: HORN_CMD
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  '79':
+    id: '79'
+    name: horn_rpt_79
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - bit: 23
+      enum: {0: OUTPUT_VALUE_OFF, 1: OUTPUT_VALUE_ON}
+      is_signed_var: false
+      len: 8
+      name: OUTPUT_VALUE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 15
+      enum: {0: COMMANDED_VALUE_OFF, 1: COMMANDED_VALUE_ON}
+      is_signed_var: false
+      len: 8
+      name: COMMANDED_VALUE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 7
+      enum: {0: MANUAL_INPUT_OFF, 1: MANUAL_INPUT_ON}
+      is_signed_var: false
+      len: 8
+      name: MANUAL_INPUT
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  7a:
+    id: 7a
+    name: wheel_speed_rpt_7a
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 55, is_signed_var: true, len: 16, name: WHEEL_SPD_REAR_RIGHT, offset: 0.0,
+      order: motorola, physical_range: '[-32768|32767]', physical_unit: rad/s, precision: 1.0,
+      type: int}
+    - {bit: 39, is_signed_var: true, len: 16, name: WHEEL_SPD_REAR_LEFT, offset: 0.0,
+      order: motorola, physical_range: '[-32768|32767]', physical_unit: rad/s, precision: 1.0,
+      type: int}
+    - {bit: 23, is_signed_var: true, len: 16, name: WHEEL_SPD_FRONT_RIGHT, offset: 0.0,
+      order: motorola, physical_range: '[-32768|32767]', physical_unit: rad/s, precision: 1.0,
+      type: int}
+    - {bit: 7, is_signed_var: true, len: 16, name: WHEEL_SPD_FRONT_LEFT, offset: 0.0,
+      order: motorola, physical_range: '[-32768|32767]', physical_unit: rad/s, precision: 1.0,
+      type: int}
+  '80':
+    id: '80'
+    name: parking_brake_status_rpt_80
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - bit: 0
+      enum: {0: PARKING_BRAKE_ENABLED_OFF, 1: PARKING_BRAKE_ENABLED_ON}
+      is_signed_var: false
+      len: 1
+      name: PARKING_BRAKE_ENABLED
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|1]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  '81':
+    id: '81'
+    name: yaw_rate_rpt_81
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 7, is_signed_var: true, len: 16, name: YAW_RATE, offset: 0.0, order: motorola,
+      physical_range: '[-327.68|327.67]', physical_unit: rad/s, precision: 0.01, type: double}
+  '82':
+    id: '82'
+    name: lat_lon_heading_rpt_82
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 55, is_signed_var: true, len: 16, name: HEADING, offset: 0.0, order: motorola,
+      physical_range: '[-327.68|327.67]', physical_unit: deg, precision: 0.01, type: double}
+    - {bit: 47, is_signed_var: true, len: 8, name: LONGITUDE_SECONDS, offset: 0.0,
+      order: motorola, physical_range: '[-128|127]', physical_unit: sec, precision: 1.0,
+      type: int}
+    - {bit: 39, is_signed_var: true, len: 8, name: LONGITUDE_MINUTES, offset: 0.0,
+      order: motorola, physical_range: '[-128|127]', physical_unit: min, precision: 1.0,
+      type: int}
+    - {bit: 31, is_signed_var: true, len: 8, name: LONGITUDE_DEGREES, offset: 0.0,
+      order: motorola, physical_range: '[-128|127]', physical_unit: deg, precision: 1.0,
+      type: int}
+    - {bit: 23, is_signed_var: true, len: 8, name: LATITUDE_SECONDS, offset: 0.0,
+      order: motorola, physical_range: '[-128|127]', physical_unit: sec, precision: 1.0,
+      type: int}
+    - {bit: 15, is_signed_var: true, len: 8, name: LATITUDE_MINUTES, offset: 0.0,
+      order: motorola, physical_range: '[-128|127]', physical_unit: min, precision: 1.0,
+      type: int}
+    - {bit: 7, is_signed_var: true, len: 8, name: LATITUDE_DEGREES, offset: 0.0, order: motorola,
+      physical_range: '[-128|127]', physical_unit: deg, precision: 1.0, type: int}
+  '83':
+    id: '83'
+    name: date_time_rpt_83
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - {bit: 47, is_signed_var: false, len: 8, name: TIME_SECOND, offset: 0.0, order: motorola,
+      physical_range: '[0|60]', physical_unit: sec, precision: 1.0, type: int}
+    - {bit: 39, is_signed_var: false, len: 8, name: TIME_MINUTE, offset: 0.0, order: motorola,
+      physical_range: '[0|60]', physical_unit: min, precision: 1.0, type: int}
+    - {bit: 31, is_signed_var: false, len: 8, name: TIME_HOUR, offset: 0.0, order: motorola,
+      physical_range: '[0|23]', physical_unit: hr, precision: 1.0, type: int}
+    - {bit: 23, is_signed_var: false, len: 8, name: DATE_DAY, offset: 1.0, order: motorola,
+      physical_range: '[1|31]', physical_unit: dy, precision: 1.0, type: int}
+    - {bit: 15, is_signed_var: false, len: 8, name: DATE_MONTH, offset: 1.0, order: motorola,
+      physical_range: '[1|12]', physical_unit: mon, precision: 1.0, type: int}
+    - {bit: 7, is_signed_var: false, len: 8, name: DATE_YEAR, offset: 2000.0, order: motorola,
+      physical_range: '[2000|2255]', physical_unit: yr, precision: 1.0, type: int}
+  '90':
+    id: '90'
+    name: wiper_cmd_90
+    protocol_type: report
+    sender: CUSTOMER_ECU
+    vars:
+    - bit: 7
+      enum: {0: WIPER_CMD_WIPERS_OFF, 1: WIPER_CMD_INTERMITTENT_1, 2: WIPER_CMD_INTERMITTENT_2,
+        3: WIPER_CMD_INTERMITTENT_3, 4: WIPER_CMD_INTERMITTENT_4, 5: WIPER_CMD_INTERMITTENT_5,
+        6: WIPER_CMD_LOW, 7: WIPER_CMD_HIGH}
+      is_signed_var: false
+      len: 8
+      name: WIPER_CMD
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|7]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+  '91':
+    id: '91'
+    name: wiper_rpt_91
+    protocol_type: report
+    sender: PACMOD
+    vars:
+    - bit: 23
+      enum: {0: OUTPUT_VALUE_WIPERS_OFF, 1: OUTPUT_VALUE_INTERMITTENT_1, 2: OUTPUT_VALUE_INTERMITTENT_2,
+        3: OUTPUT_VALUE_INTERMITTENT_3, 4: OUTPUT_VALUE_INTERMITTENT_4, 5: OUTPUT_VALUE_INTERMITTENT_5,
+        6: OUTPUT_VALUE_LOW, 7: OUTPUT_VALUE_HIGH}
+      is_signed_var: false
+      len: 8
+      name: OUTPUT_VALUE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|7]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 15
+      enum: {0: COMMANDED_VALUE_WIPERS_OFF, 1: COMMANDED_VALUE_INTERMITTENT_1, 2: COMMANDED_VALUE_INTERMITTENT_2,
+        3: COMMANDED_VALUE_INTERMITTENT_3, 4: COMMANDED_VALUE_INTERMITTENT_4, 5: COMMANDED_VALUE_INTERMITTENT_5,
+        6: COMMANDED_VALUE_LOW, 7: COMMANDED_VALUE_HIGH}
+      is_signed_var: false
+      len: 8
+      name: COMMANDED_VALUE
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|7]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum
+    - bit: 7
+      enum: {0: MANUAL_INPUT_WIPERS_OFF, 1: MANUAL_INPUT_INTERMITTENT_1, 2: MANUAL_INPUT_INTERMITTENT_2,
+        3: MANUAL_INPUT_INTERMITTENT_3, 4: MANUAL_INPUT_INTERMITTENT_4, 5: MANUAL_INPUT_INTERMITTENT_5,
+        6: MANUAL_INPUT_LOW, 7: MANUAL_INPUT_HIGH}
+      is_signed_var: false
+      len: 8
+      name: MANUAL_INPUT
+      offset: 0.0
+      order: motorola
+      physical_range: '[0|7]'
+      physical_unit: ''
+      precision: 1.0
+      type: enum

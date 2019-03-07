@@ -1,0 +1,6 @@
+name : "GEM"
+brand : POLARIS
+model : GEM
+license {
+    vin : "52CG4AGA4J5018457"
+}

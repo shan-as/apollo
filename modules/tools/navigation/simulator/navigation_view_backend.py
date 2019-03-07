@@ -39,15 +39,15 @@ from modules.perception.proto import perception_obstacle_pb2
 
 app = Flask(__name__)
 CORS(app)
-lat = 37.415889
-lon = -122.014505
+lat = 40.611597
+lon = -89.482791
 API_KEY = ""
 routing_pub = None
 mobileye_pb = None
 perception_pb = None
 planning_pb = None
 heading = None
-projector = pyproj.Proj(proj='utm', zone=10, ellps='WGS84')
+projector = pyproj.Proj(proj='utm', zone=16, ellps='WGS84')
 
 
 def mobileye_callback(p_mobileye_pb):

@@ -20,7 +20,7 @@ import sys
 import pyproj
 import matplotlib.pyplot as plt
 
-projector = pyproj.Proj(proj='utm', zone=10, ellps='WGS84')
+projector = pyproj.Proj(proj='utm', zone=16, ellps='WGS84')
 fig = plt.figure()
 ax = plt.subplot2grid((1, 1), (0, 0))
 styles = ['r-', 'b-']
