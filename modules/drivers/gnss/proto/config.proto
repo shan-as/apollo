@@ -69,6 +69,7 @@ enum ImuType {
   ISA100C = 26;         // Northrop Grumman Litef ISA-100C
   ADIS16488 = 31;       // Analog Devices ADIS16488
   STIM300 = 32;         // Sensonor STIM300
+  KVH1750 = 33;         // KVH Industries IMU-KVH1750
   ISA100 = 34;          // Northrop Grumman Litef ISA-100
   ISA100_400HZ = 38;    // Northrop Grumman Litef ISA-100
   ISA100C_400HZ = 39;   // Northrop Grumman Litef ISA-100

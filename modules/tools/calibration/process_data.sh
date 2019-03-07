@@ -19,8 +19,9 @@
 #! /bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" && pwd  )"
+#DIR=/apollo/modules/tools/calibration
 rm $DIR/result.csv
-for f in `ls ${1}/*_recorded.csv`
+for f in `ls ${1}/*.csv`
 do
     echo "Processing $f"
     python -W ignore $DIR/process_data.py $f

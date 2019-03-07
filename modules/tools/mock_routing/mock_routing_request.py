@@ -45,16 +45,16 @@ def main():
     sequence_num = sequence_num + 1
 
     waypoint = routing_request.waypoint.add()
-    waypoint.pose.x = 587696.82286
-    waypoint.pose.y = 4141446.66696
-    waypoint.id = '1-1'
+    waypoint.pose.x = 289922.142159
+    waypoint.pose.y = 4498627.69291
+    waypoint.id = 'lane_0_0'
     waypoint.s = 1
 
     waypoint = routing_request.waypoint.add()
-    waypoint.pose.x = 586948.740120
-    waypoint.pose.y = 4141171.118641
-    waypoint.id = '1-1'
-    waypoint.s = 80
+    waypoint.pose.x = 289963.640391
+    waypoint.pose.y = 4498692.48672
+    waypoint.id = 'lane_50_0'
+    waypoint.s = 57.3953496566
 
     request_publisher = rospy.Publisher(
             '/apollo/routing_request', routing_pb2.RoutingRequest, queue_size=1)
